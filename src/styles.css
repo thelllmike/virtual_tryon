@@ -1,0 +1,282 @@
+/* ─── Reset & Base ─── */
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    Oxygen, Ubuntu, Cantarell, sans-serif;
+  background: #0f0f1a;
+  color: #d8dae5;
+  min-height: 100vh;
+  line-height: 1.5;
+}
+
+/* ─── Layout ─── */
+#app {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 20px 24px;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+header h1 {
+  font-size: 1.7rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #e94560, #c23ae9);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.subtitle {
+  font-size: 0.82rem;
+  color: #6a6d7e;
+  margin-top: 2px;
+}
+
+main {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+/* ─── Canvas ─── */
+.canvas-wrapper {
+  flex: 1;
+  min-width: 0;
+}
+
+.canvas-container {
+  position: relative;
+  background: #16182a;
+  border-radius: 14px;
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #23263a;
+}
+
+#output-canvas {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transform: scaleX(-1); /* Mirror for selfie view */
+}
+
+#status-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6a6d7e;
+  font-size: 1rem;
+  text-align: center;
+  padding: 20px;
+  pointer-events: none;
+  background: rgba(15, 15, 26, 0.7);
+  transition: opacity 0.3s;
+}
+
+#status-overlay.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ─── Controls Panel ─── */
+.controls {
+  width: 270px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.control-group {
+  background: #16182a;
+  padding: 14px 16px;
+  border-radius: 10px;
+  border: 1px solid #23263a;
+}
+
+.control-group label {
+  display: block;
+  font-size: 0.85rem;
+  color: #9a9db0;
+  margin-bottom: 8px;
+}
+
+.checkbox-label {
+  display: flex !important;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  margin-bottom: 0 !important;
+}
+
+.checkbox-label span {
+  color: #9a9db0;
+  font-size: 0.85rem;
+}
+
+/* ─── Buttons ─── */
+.buttons-row {
+  display: flex;
+  gap: 8px;
+}
+
+button {
+  flex: 1;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.88rem;
+  font-weight: 600;
+  transition: background 0.2s, transform 0.1s;
+}
+
+button:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+#btn-start {
+  background: linear-gradient(135deg, #e94560, #c23ae9);
+  color: #fff;
+}
+
+#btn-start:hover:not(:disabled) {
+  background: linear-gradient(135deg, #d13a55, #a832cf);
+}
+
+#btn-stop {
+  background: #23263a;
+  color: #b0b3c5;
+  border: 1px solid #33365a;
+}
+
+#btn-stop:hover:not(:disabled) {
+  background: #2d3050;
+}
+
+button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ─── Select ─── */
+select {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #33365a;
+  background: #1c1e32;
+  color: #d8dae5;
+  font-size: 0.88rem;
+  outline: none;
+}
+
+select:focus {
+  border-color: #e94560;
+}
+
+/* ─── Range Slider ─── */
+input[type='range'] {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: #23263a;
+  outline: none;
+  margin-top: 4px;
+}
+
+input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #e94560;
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+
+input[type='range']::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+input[type='range']::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #e94560;
+  cursor: pointer;
+  border: none;
+}
+
+/* ─── Checkbox ─── */
+input[type='checkbox'] {
+  width: 16px;
+  height: 16px;
+  accent-color: #e94560;
+  cursor: pointer;
+}
+
+/* ─── Info Panel ─── */
+.info-panel {
+  background: #16182a;
+  padding: 14px 16px;
+  border-radius: 10px;
+  border: 1px solid #23263a;
+}
+
+.info-panel h3 {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #565872;
+  margin-bottom: 10px;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 3px 0;
+  font-size: 0.82rem;
+}
+
+.info-row span:first-child {
+  color: #6a6d7e;
+}
+
+.info-row span:last-child {
+  font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+  color: #7ec8e3;
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 768px) {
+  main {
+    flex-direction: column;
+  }
+
+  .controls {
+    width: 100%;
+  }
+
+  .canvas-container {
+    aspect-ratio: auto;
+    min-height: 300px;
+  }
+}

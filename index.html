@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Virtual Spectacle Try-On</title>
+  <link rel="stylesheet" href="/src/styles.css" />
+</head>
+<body>
+  <div id="app">
+    <header>
+      <h1>Virtual Spectacle Try-On</h1>
+      <p class="subtitle">Powered by TensorFlow.js &amp; MediaPipe FaceMesh</p>
+    </header>
+
+    <main>
+      <div class="canvas-wrapper">
+        <div class="canvas-container">
+          <canvas id="output-canvas"></canvas>
+          <div id="status-overlay">Loading model&hellip;</div>
+        </div>
+      </div>
+
+      <aside class="controls">
+        <div class="control-group buttons-row">
+          <button id="btn-start" disabled>Start Camera</button>
+          <button id="btn-stop" disabled>Stop Camera</button>
+        </div>
+
+        <div class="control-group">
+          <label for="frame-select">Frame Style</label>
+          <select id="frame-select">
+            <option value="0">Classic</option>
+            <option value="1">Round</option>
+            <option value="2">Cat-Eye</option>
+          </select>
+        </div>
+
+        <div class="control-group">
+          <label class="checkbox-label">
+            <input type="checkbox" id="debug-toggle" />
+            <span>Debug Landmarks</span>
+          </label>
+        </div>
+
+        <div class="control-group">
+          <label for="scale-slider">
+            Frame Scale: <strong id="scale-value">1.00</strong>
+          </label>
+          <input type="range" id="scale-slider" min="0.8" max="1.3" step="0.01" value="1.0" />
+        </div>
+
+        <div class="control-group">
+          <label for="offset-slider">
+            Vertical Offset: <strong id="offset-value">0</strong>px
+          </label>
+          <input type="range" id="offset-slider" min="-40" max="40" step="1" value="0" />
+        </div>
+
+        <div class="info-panel" id="info-panel">
+          <h3>Live Stats</h3>
+          <div class="info-row"><span>Scale</span><span id="info-scale">&ndash;</span></div>
+          <div class="info-row"><span>Rotation</span><span id="info-rotation">&ndash;</span></div>
+          <div class="info-row"><span>Yaw</span><span id="info-yaw">&ndash;</span></div>
+          <div class="info-row"><span>FPS</span><span id="info-fps">&ndash;</span></div>
+          <div class="info-row" style="margin-top:6px;font-size:0.75rem;color:#565872"><span>D=detect S=success E=error</span></div>
+        </div>
+      </aside>
+    </main>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
