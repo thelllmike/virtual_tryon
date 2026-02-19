@@ -130,8 +130,8 @@ function canvasToImage(cvs) {
 
 async function startCamera() {
   // Camera requires a secure context (HTTPS or localhost).
-  if (!window.isSecureContext || !navigator.mediaDevices) {
-    setStatus('Camera requires HTTPS. Ask your site admin to enable SSL (free via Let\'s Encrypt).');
+  if (!navigator.mediaDevices) {
+    setStatus('Camera unavailable — the page must be served over HTTPS. For local WordPress, use ngrok or LocalWP\'s built-in SSL.');
     return;
   }
   try {
