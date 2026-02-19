@@ -305,6 +305,23 @@ input[type='checkbox'] {
 body.embedded header { display: none; }
 body.embedded #app   { padding: 12px; }
 
+/* ─── Footer ─── */
+.site-footer {
+  text-align: center;
+  padding: 14px 24px;
+  font-size: 0.78rem;
+  color: #3d4060;
+  border-top: 1px solid #1a1c2e;
+  margin-top: 24px;
+}
+
+.site-footer a {
+  color: #565872;
+  text-decoration: none;
+}
+
+.site-footer a:hover { color: #9a9db0; }
+
 /* ─── Responsive ─── */
 @media (max-width: 768px) {
   main {

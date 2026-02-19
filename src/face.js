@@ -1,9 +1,13 @@
 /**
- * face.js — Face landmark detection using MediaPipe FaceMesh (WASM runtime).
+ * face.js — Face landmark detection using MediaPipe FaceMesh (tfjs runtime).
  *
- * The MediaPipe runtime is significantly more reliable than the pure-TFJS
- * runtime for face detection across different systems and browsers.
- * WASM binaries are loaded from the jsDelivr CDN.
+ * Uses the @tensorflow/tfjs runtime so Vite can bundle it cleanly for
+ * production (Vercel, Netlify, etc.).  The mediapipe runtime requires a
+ * WASM binary that breaks when bundled by Rollup/esbuild in production.
+ *
+ * The tfjs runtime delivers equivalent accuracy for glasses try-on.
+ * Iris refinement is not available in this runtime; the eye-corner
+ * fallback in extractFaceTransform() handles that transparently.
  */
 
 import * as faceLandmarksDetection from '@tensorflow-models/face-landmarks-detection';
@@ -22,14 +26,12 @@ export const diag = { attempts: 0, successes: 0, errors: 0, lastError: '' };
  * @returns {Promise<Object>} the created detector instance
  */
 export async function initFaceDetector(onProgress) {
-  if (onProgress) onProgress('Loading FaceMesh model (WASM)…');
+  if (onProgress) onProgress('Loading FaceMesh model…');
 
   const model = faceLandmarksDetection.SupportedModels.MediaPipeFaceMesh;
   detector = await faceLandmarksDetection.createDetector(model, {
-    runtime: 'mediapipe',
-    refineLandmarks: true,
+    runtime: 'tfjs',   // bundles cleanly — no WASM loader needed on Vercel
     maxFaces: 1,
-    solutionPath: 'https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh',
   });
 
   if (onProgress) onProgress('Model loaded!');

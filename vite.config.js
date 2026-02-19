@@ -38,7 +38,11 @@ export default defineConfig({
   optimizeDeps: {
     include: [
       '@tensorflow-models/face-landmarks-detection',
-      '@mediapipe/face_mesh',
+      '@tensorflow/tfjs-core',
+      '@tensorflow/tfjs-backend-webgl',
+      '@tensorflow/tfjs-converter',
     ],
+    // @mediapipe/face_mesh is no longer used — switched to tfjs runtime
+    // to avoid WASM bundling failures in Vite production builds.
   },
 });

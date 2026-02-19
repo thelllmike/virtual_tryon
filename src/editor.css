@@ -11,6 +11,9 @@ body {
   overflow: hidden;
 }
 
+/* Push footer below the editor layout */
+.ed-layout { flex: 1; min-height: 0; }
+
 /* ─── Header ─── */
 .ed-header {
   display: flex;
@@ -75,7 +78,6 @@ body {
 /* ─── Layout ─── */
 .ed-layout {
   display: flex;
-  flex: 1;
   overflow: hidden;
 }
 
@@ -361,6 +363,20 @@ body {
   transform: translate(0, 0);
   transition: width 0.05s, height 0.05s;
 }
+
+/* ─── Footer ─── */
+.site-footer {
+  flex-shrink: 0;
+  text-align: center;
+  padding: 8px 20px;
+  font-size: 0.72rem;
+  color: #3d4060;
+  border-top: 1px solid #1a1c2e;
+  background: #0f0f1a;
+}
+
+.site-footer a { color: #565872; text-decoration: none; }
+.site-footer a:hover { color: #9a9db0; }
 
 /* ─── Scrollbar ─── */
 .ed-sidebar::-webkit-scrollbar { width: 4px; }
