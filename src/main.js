@@ -129,6 +129,11 @@ function canvasToImage(cvs) {
 // ═══════════════════════════════════════════════════════════════════
 
 async function startCamera() {
+  // Camera requires a secure context (HTTPS or localhost).
+  if (!window.isSecureContext || !navigator.mediaDevices) {
+    setStatus('Camera requires HTTPS. Ask your site admin to enable SSL (free via Let\'s Encrypt).');
+    return;
+  }
   try {
     setStatus('Requesting camera access…');
     state.stream = await navigator.mediaDevices.getUserMedia({
