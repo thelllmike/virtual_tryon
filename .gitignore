@@ -1,4 +1,47 @@
-node_modules
-dist
+# ── Dependencies ──────────────────────────────────────────────────
+node_modules/
+
+# ── Build output ───────────────────────────────────────────────────
+dist/
+
+# ── WordPress plugin (not deployed via git) ────────────────────────
+wordpress-plugin/
+
+# ── ML model files (downloaded at runtime from CDN, never committed)
+# TensorFlow.js / MediaPipe weight shards
+*.bin
+*.json.gz
+
+# ONNX models (@imgly/background-removal downloads these at runtime)
+*.onnx
+*.ort
+
+# WebAssembly binaries (loaded from CDN, not stored locally)
+*.wasm
+
+# TFLite / MediaPipe models
+*.tflite
+*.task
+
+# ── Large 3D / binary assets (store in CDN or Git LFS instead) ─────
+# GLB/GLTF 3D models can be 10MB+ — commit via Git LFS or host on CDN
+*.glb
+*.gltf
+public/assets/glb/
+
+# ── OS / Editor noise ──────────────────────────────────────────────
 .DS_Store
+**/.DS_Store
 *.local
+Thumbs.db
+.vscode/
+.idea/
+
+# ── Logs ──────────────────────────────────────────────────────────
+*.log
+npm-debug.log*
+
+# ── Env secrets ───────────────────────────────────────────────────
+.env
+.env.*
+!.env.example

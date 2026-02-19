@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spectacle Image Editor — Virtual Try-On Prep</title>
+  <link rel="stylesheet" href="/src/editor.css" />
+</head>
+<body>
+
+  <!-- ── Header ── -->
+  <header class="ed-header">
+    <a href="/" class="back-link">← Try-On</a>
+    <div class="ed-title">
+      <h1>Spectacle Image Editor</h1>
+      <span class="ed-subtitle">Remove background · Edit · Export try-on PNG</span>
+    </div>
+    <div class="ed-header-right">
+      <span id="zoom-label" class="zoom-label">100%</span>
+      <button id="btn-fit"      class="icon-btn" title="Fit to screen">⊡</button>
+      <button id="btn-zoom-in"  class="icon-btn" title="Zoom in">＋</button>
+      <button id="btn-zoom-out" class="icon-btn" title="Zoom out">－</button>
+    </div>
+  </header>
+
+  <!-- ── Layout ── -->
+  <div class="ed-layout">
+
+    <!-- LEFT — Tools -->
+    <aside class="ed-sidebar ed-left">
+
+      <!-- Upload -->
+      <section class="ed-section">
+        <h2 class="section-title">1 · Upload</h2>
+        <div class="upload-zone" id="upload-zone">
+          <input type="file" id="file-input" accept="image/*" />
+          <div class="upload-icon">🖼️</div>
+          <p>Drop image here<br/>or <strong>click to browse</strong></p>
+          <p class="upload-hint">JPG, PNG, WEBP supported</p>
+        </div>
+      </section>
+
+      <!-- Auto remove -->
+      <section class="ed-section">
+        <h2 class="section-title">2 · Auto Remove BG</h2>
+        <button id="btn-auto-remove" class="btn-primary" disabled>
+          ✨ Remove Background (AI)
+        </button>
+        <p class="hint">Runs in your browser — no upload to any server.</p>
+
+        <!-- Progress -->
+        <div id="progress-wrap" class="progress-wrap" style="display:none">
+          <div class="progress-bar-bg">
+            <div id="progress-bar" class="progress-bar-fill" style="width:0%"></div>
+          </div>
+          <span id="progress-text" class="progress-text">0%</span>
+        </div>
+      </section>
+
+      <!-- Manual tools -->
+      <section class="ed-section">
+        <h2 class="section-title">3 · Manual Edit</h2>
+
+        <div class="tool-group">
+          <button data-tool="eraser"  class="tool-btn active" id="tool-eraser"  title="Erase (make transparent)">
+            🧹 Eraser
+          </button>
+          <button data-tool="restore" class="tool-btn" id="tool-restore" title="Restore original pixels">
+            🔄 Restore
+          </button>
+          <button data-tool="magic"   class="tool-btn" id="tool-magic"   title="Magic erase — click to flood-fill erase by colour">
+            🪄 Magic
+          </button>
+        </div>
+
+        <div class="slider-row">
+          <label>Brush size</label>
+          <div class="slider-with-val">
+            <input type="range" id="brush-size" min="4" max="120" value="20" />
+            <span id="brush-label" class="val-badge">20px</span>
+          </div>
+        </div>
+
+        <div id="magic-panel" class="slider-row" style="display:none">
+          <label>Tolerance</label>
+          <div class="slider-with-val">
+            <input type="range" id="magic-tolerance" min="4" max="100" value="32" />
+            <span id="tolerance-label" class="val-badge">32</span>
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button id="btn-undo" class="btn-secondary" disabled>↩ Undo</button>
+          <button id="btn-redo" class="btn-secondary" disabled>↪ Redo</button>
+        </div>
+        <p class="hint">Ctrl/⌘ + Z  undo &nbsp;·&nbsp; Ctrl/⌘ + Y  redo</p>
+      </section>
+
+    </aside>
+
+    <!-- CENTRE — Canvas -->
+    <main class="ed-canvas-area">
+
+      <!-- Empty state -->
+      <div id="empty-state" class="empty-state">
+        <p>⬆️ Upload a spectacle image to get started</p>
+      </div>
+
+      <!-- Editor canvas wrapper (shown after image loaded) -->
+      <div id="editor-wrap" class="editor-wrap" style="display:none">
+        <canvas id="editor-canvas"></canvas>
+        <!-- Brush cursor ring (follows mouse) -->
+        <div id="cursor-ring" class="cursor-ring" style="display:none"></div>
+      </div>
+
+    </main>
+
+    <!-- RIGHT — Export -->
+    <aside class="ed-sidebar ed-right">
+
+      <section class="ed-section">
+        <h2 class="section-title">4 · Export</h2>
+
+        <div class="field-row">
+          <label>Filename</label>
+          <input type="text" id="download-name" value="glasses" placeholder="glasses" />
+        </div>
+
+        <div class="field-row">
+          <label>Width (px)</label>
+          <input type="number" id="export-w" value="800" min="100" max="4000" />
+        </div>
+
+        <div class="field-row">
+          <label>Height (px)</label>
+          <input type="number" id="export-h" value="300" min="50" max="2000" />
+        </div>
+
+        <button id="btn-auto-crop" class="btn-secondary btn-full" disabled>
+          ✂️ Auto-Crop to Content
+        </button>
+
+        <button id="btn-download" class="btn-primary btn-full" disabled>
+          ⬇ Download PNG
+        </button>
+
+        <div class="export-info">
+          <p class="hint">
+            <strong>Recommended dimensions:</strong><br/>
+            800 × 300 px — wide, short<br/>
+            Transparent background required.<br/>
+            Glasses should fill ~80% of width.
+          </p>
+          <div class="anchor-diagram">
+            <div class="anchor-bar">
+              <span class="anchor-dot left" title="Left lens anchor at 30%">L</span>
+              <span class="anchor-dot right" title="Right lens anchor at 70%">R</span>
+            </div>
+            <p class="anchor-hint">Align lens centres to L and R marks</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="ed-section">
+        <h2 class="section-title">Tips</h2>
+        <ul class="tips-list">
+          <li>Use <strong>AI Remove</strong> first for a quick base result</li>
+          <li>Switch to <strong>🪄 Magic</strong> to erase leftover background by clicking on it</li>
+          <li>Use <strong>🧹 Eraser</strong> for fine detail around the frame</li>
+          <li>Use <strong>🔄 Restore</strong> if you erased too much</li>
+          <li>Hold <strong>Alt + drag</strong> to pan the canvas</li>
+          <li>Scroll to <strong>zoom</strong></li>
+          <li>Click <strong>Auto-Crop</strong> before downloading to trim empty space</li>
+        </ul>
+      </section>
+
+    </aside>
+
+  </div>
+
+  <script type="module" src="/src/editor.js"></script>
+</body>
+</html>

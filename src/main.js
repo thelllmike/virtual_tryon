@@ -1,9 +1,8 @@
 /**
- * main.js — Application entry point.
+ * main.js — Virtual Try-On entry point (2D PNG mode).
  *
- * Wires up the UI controls, manages camera lifecycle, and runs the
- * requestAnimationFrame render loop that ties face detection to the
- * glasses overlay renderer.
+ * Standalone demo: loads preset PNG assets from /assets/
+ * WordPress iframe:  reads a single PNG URL from ?png=URL
  */
 
 import { initFaceDetector, detectFace, extractFaceTransform, diag } from './face.js';
@@ -16,99 +15,94 @@ import {
 } from './render.js';
 
 // ═══════════════════════════════════════════════════════════════════
+// URL param config  (WordPress iframe mode)
+// ═══════════════════════════════════════════════════════════════════
+
+const params = new URLSearchParams(window.location.search);
+const CONFIG = {
+  pngUrl:   params.get('png')      || null,
+  embedded: params.has('embedded'),
+};
+
+if (CONFIG.embedded) document.body.classList.add('embedded');
+
+// ═══════════════════════════════════════════════════════════════════
 // State
 // ═══════════════════════════════════════════════════════════════════
 
 const state = {
-  running: false,
-  stream: null,
-
-  // Detection throttle — run model every N render frames to keep FPS high.
-  frameCount: 0,
+  running:  false,
+  stream:   null,
+  frameCount:        0,
   detectionInterval: 2,
-
-  // UI-driven settings
-  debugMode: false,
+  debugMode:            false,
   frameScaleMultiplier: 1.0,
-  verticalOffset: 0,
-  currentFrameIndex: 0,
-
-  // Smoothed transform (exponential moving average)
-  smooth: null,
-  smoothingFactor: 0.35, // 0 = frozen, 1 = raw
-
-  // "No face" grace period
-  lastFaceTime: 0,
-  faceTimeoutMs: 500,
+  verticalOffset:       0,
+  currentFrameIndex:    0,
+  smooth:           null,
+  smoothingFactor:  0.35,
+  lastFaceTime:     0,
+  faceTimeoutMs:    500,
   lastRawTransform: null,
-
-  // FPS counter
   fpsCount: 0,
-  fpsLast: performance.now(),
-  fps: 0,
+  fpsLast:  performance.now(),
+  fps:      0,
 };
 
 // ═══════════════════════════════════════════════════════════════════
-// DOM references
+// DOM
 // ═══════════════════════════════════════════════════════════════════
 
-const canvas = document.getElementById('output-canvas');
-const ctx = canvas.getContext('2d');
+const canvas  = document.getElementById('output-canvas');
+const ctx     = canvas.getContext('2d');
 
-// Hidden <video> used as the webcam source — never appended to the DOM.
-const video = document.createElement('video');
+const video   = document.createElement('video');
 video.playsInline = true;
-video.autoplay = true;
+video.autoplay    = true;
 
-const btnStart = document.getElementById('btn-start');
-const btnStop = document.getElementById('btn-stop');
+const btnStart    = document.getElementById('btn-start');
+const btnStop     = document.getElementById('btn-stop');
 const frameSelect = document.getElementById('frame-select');
 const debugToggle = document.getElementById('debug-toggle');
 const scaleSlider = document.getElementById('scale-slider');
 const offsetSlider = document.getElementById('offset-slider');
-const scaleValue = document.getElementById('scale-value');
+const scaleValue  = document.getElementById('scale-value');
 const offsetValue = document.getElementById('offset-value');
 const statusOverlay = document.getElementById('status-overlay');
-
-const infoScale = document.getElementById('info-scale');
+const infoScale    = document.getElementById('info-scale');
 const infoRotation = document.getElementById('info-rotation');
-const infoYaw = document.getElementById('info-yaw');
-const infoFps = document.getElementById('info-fps');
+const infoYaw      = document.getElementById('info-yaw');
+const infoFps      = document.getElementById('info-fps');
 
 // ═══════════════════════════════════════════════════════════════════
 // Glasses assets
 // ═══════════════════════════════════════════════════════════════════
 
-/** @type {Array<{ img: HTMLImageElement|HTMLCanvasElement, halves: {left,right} }>} */
-const glassesAssets = [];
-
-const GLASSES_URLS = [
-  '/assets/glasses.png',
-  '/assets/glasses2.png',
-  '/assets/glasses3.png',
-];
+const glassesAssets  = [];
+const GLASSES_URLS   = ['/assets/glasses.png', '/assets/glasses2.png', '/assets/glasses3.png'];
 const FALLBACK_STYLES = ['classic', 'round', 'cateye'];
 
-/**
- * Attempt to load each glasses PNG; fall back to programmatic generation.
- */
 async function loadGlassesAssets() {
+  if (CONFIG.pngUrl) {
+    const img = await tryLoadImage(CONFIG.pngUrl, generateFallbackGlasses('classic'));
+    glassesAssets.push({ img, halves: splitGlassesImage(img) });
+    // Hide frame selector — only one product
+    frameSelect?.closest('.control-group')?.style.setProperty('display', 'none');
+    return;
+  }
   for (let i = 0; i < GLASSES_URLS.length; i++) {
-    let img;
-    try {
-      img = await loadImage(GLASSES_URLS[i]);
-      // Treat tiny placeholder files (e.g. 1×1 px) as "missing".
-      if (img.width < 20 || img.height < 20) throw new Error('image too small');
-    } catch {
-      // Generate a fallback on the fly.
-      const fallbackCanvas = generateFallbackGlasses(FALLBACK_STYLES[i]);
-      img = await canvasToImage(fallbackCanvas);
-    }
+    const img = await tryLoadImage(GLASSES_URLS[i], generateFallbackGlasses(FALLBACK_STYLES[i]));
+    glassesAssets.push({ img, halves: splitGlassesImage(img) });
+  }
+}
 
-    glassesAssets.push({
-      img,
-      halves: splitGlassesImage(img),
-    });
+async function tryLoadImage(src, fallback) {
+  try {
+    const img = await loadImage(src);
+    if (img.width < 20 || img.height < 20) throw new Error('too small');
+    return img;
+  } catch {
+    return canvasToImage(fallback);
   }
 }
 
@@ -116,7 +110,7 @@ function loadImage(src) {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.crossOrigin = 'anonymous';
-    img.onload = () => resolve(img);
+    img.onload  = () => resolve(img);
     img.onerror = reject;
     img.src = src;
   });
@@ -131,30 +125,24 @@ function canvasToImage(cvs) {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// Camera lifecycle
+// Camera
 // ═══════════════════════════════════════════════════════════════════
 
 async function startCamera() {
   try {
     setStatus('Requesting camera access…');
-
     state.stream = await navigator.mediaDevices.getUserMedia({
       video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } },
       audio: false,
     });
-
     video.srcObject = state.stream;
     await video.play();
-
-    // Match canvas resolution to actual video feed.
-    canvas.width = video.videoWidth;
+    canvas.width  = video.videoWidth;
     canvas.height = video.videoHeight;
-
-    state.running = true;
+    state.running    = true;
     state.frameCount = 0;
     btnStart.disabled = true;
-    btnStop.disabled = false;
-
+    btnStop.disabled  = false;
     setStatus('', true);
     requestAnimationFrame(renderLoop);
   } catch (err) {
@@ -164,115 +152,77 @@ async function startCamera() {
 
 function stopCamera() {
   state.running = false;
-
   if (state.stream) {
     state.stream.getTracks().forEach((t) => t.stop());
     state.stream = null;
   }
   video.srcObject = null;
-
   btnStart.disabled = false;
-  btnStop.disabled = true;
-
-  // Clear canvas
+  btnStop.disabled  = true;
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  // Reset tracking state
-  state.smooth = null;
+  state.smooth          = null;
   state.lastRawTransform = null;
-
-  // Reset info panel
-  infoScale.textContent = '\u2013';
-  infoRotation.textContent = '\u2013';
-  infoYaw.textContent = '\u2013';
-  infoFps.textContent = '\u2013';
-
+  infoScale.textContent    = '–';
+  infoRotation.textContent = '–';
+  infoYaw.textContent      = '–';
+  infoFps.textContent      = '–';
   setStatus('Camera stopped');
 }
 
 function handleCameraError(err) {
   const msgs = {
-    NotAllowedError:
-      'Camera permission denied. Allow camera access in your browser settings and reload.',
-    PermissionDeniedError:
-      'Camera permission denied. Allow camera access in your browser settings and reload.',
-    NotFoundError: 'No camera found. Please connect a webcam and try again.',
-    DevicesNotFoundError: 'No camera found. Please connect a webcam and try again.',
-    NotReadableError: 'Camera is in use by another app. Close it and retry.',
-    TrackStartError: 'Camera is in use by another app. Close it and retry.',
-    OverconstrainedError:
-      'Camera does not support requested resolution. Try a different camera.',
+    NotAllowedError:       'Camera permission denied. Allow access and reload.',
+    PermissionDeniedError: 'Camera permission denied. Allow access and reload.',
+    NotFoundError:         'No camera found. Connect a webcam and try again.',
+    NotReadableError:      'Camera in use by another app. Close it and retry.',
+    OverconstrainedError:  'Camera does not support requested resolution.',
   };
-
-  setStatus(msgs[err.name] || `Camera error: ${err.message || 'unknown'}`);
+  setStatus(msgs[err.name] || `Camera error: ${err.message}`);
   console.error('[camera]', err);
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// Transform smoothing
+// Smoothing
 // ═══════════════════════════════════════════════════════════════════
 
 function applySmoothing(raw) {
   const a = state.smoothingFactor;
-
   if (!state.smooth) {
-    // First frame — seed with raw values.
     state.smooth = {
-      centerX: raw.center.x,
-      centerY: raw.center.y,
-      eyeDistance: raw.eyeDistance,
-      roll: raw.roll,
-      yaw: raw.yaw,
-      keypoints: raw.keypoints,
+      centerX: raw.center.x, centerY: raw.center.y,
+      eyeDistance: raw.eyeDistance, roll: raw.roll, yaw: raw.yaw,
     };
     return buildSmoothed(state.smooth, raw.keypoints);
   }
-
   const s = state.smooth;
-  s.centerX = lerp(s.centerX, raw.center.x, a);
-  s.centerY = lerp(s.centerY, raw.center.y, a);
+  s.centerX     = lerp(s.centerX,     raw.center.x,   a);
+  s.centerY     = lerp(s.centerY,     raw.center.y,   a);
   s.eyeDistance = lerp(s.eyeDistance, raw.eyeDistance, a);
-  s.roll = lerp(s.roll, raw.roll, a);
-  s.yaw = lerp(s.yaw, raw.yaw, a);
-  s.keypoints = raw.keypoints;
-
+  s.roll        = lerp(s.roll,        raw.roll,        a);
+  s.yaw         = lerp(s.yaw,         raw.yaw,         a);
   return buildSmoothed(s, raw.keypoints);
 }
 
 function buildSmoothed(s, keypoints) {
-  return {
-    center: { x: s.centerX, y: s.centerY },
-    eyeDistance: s.eyeDistance,
-    roll: s.roll,
-    yaw: s.yaw,
-    keypoints,
-  };
+  return { center: { x: s.centerX, y: s.centerY }, eyeDistance: s.eyeDistance, roll: s.roll, yaw: s.yaw, keypoints };
 }
 
-function lerp(a, b, t) {
-  return a + (b - a) * t;
-}
+function lerp(a, b, t) { return a + (b - a) * t; }
 
 // ═══════════════════════════════════════════════════════════════════
-// Render loop  (detection runs on its own async cadence so it never
-//               blocks requestAnimationFrame)
+// Render loop
 // ═══════════════════════════════════════════════════════════════════
 
 let modelReady = false;
-let detecting = false; // guard against overlapping detection calls
+let detecting  = false;
 
-/**
- * Separate async detection loop — fires every detectionInterval frames.
- * Runs independently of the draw loop so awaiting the model never stalls rendering.
- */
 async function runDetection() {
   if (!state.running || !modelReady || detecting) return;
   detecting = true;
   try {
     const face = await detectFace(video);
     if (face) {
-      const raw = extractFaceTransform(face.keypoints);
-      state.lastRawTransform = applySmoothing(raw);
+      state.lastRawTransform = applySmoothing(extractFaceTransform(face.keypoints));
       state.lastFaceTime = performance.now();
     }
   } finally {
@@ -282,63 +232,36 @@ async function runDetection() {
 
 function renderLoop() {
   if (!state.running) return;
-
-  // ── 1. Draw video frame ──
   drawVideoFrame(ctx, video, canvas.width, canvas.height);
 
-  // ── 2. Kick off detection (non-blocking) ──
   state.frameCount++;
-  if (state.frameCount % state.detectionInterval === 0) {
-    runDetection();
-  }
+  if (state.frameCount % state.detectionInterval === 0) runDetection();
 
-  // ── 3. Glasses overlay ──
-  const now = performance.now();
-  const elapsed = now - state.lastFaceTime;
-
+  const elapsed = performance.now() - state.lastFaceTime;
   if (state.lastRawTransform && elapsed < state.faceTimeoutMs) {
+    const t  = state.lastRawTransform;
     const gl = glassesAssets[state.currentFrameIndex];
-    if (gl) {
-      drawGlasses(
-        ctx,
-        gl.halves,
-        state.lastRawTransform,
-        gl.img,
-        state.frameScaleMultiplier,
-        state.verticalOffset,
-      );
-    }
+    if (gl) drawGlasses(ctx, gl.halves, t, gl.img, state.frameScaleMultiplier, state.verticalOffset);
 
-    // Info panel
-    const t = state.lastRawTransform;
-    infoScale.textContent = (t.eyeDistance / 100).toFixed(2);
-    infoRotation.textContent = `${(t.roll * (180 / Math.PI)).toFixed(1)}\u00B0`;
-    infoYaw.textContent = t.yaw.toFixed(3);
+    infoScale.textContent    = (t.eyeDistance / 100).toFixed(2);
+    infoRotation.textContent = `${(t.roll * 180 / Math.PI).toFixed(1)}°`;
+    infoYaw.textContent      = t.yaw.toFixed(3);
 
-    // Debug landmarks
-    if (state.debugMode && t.keypoints) {
-      drawDebugLandmarks(ctx, t.keypoints);
-    }
+    if (state.debugMode && t.keypoints) drawDebugLandmarks(ctx, t.keypoints);
   }
 
-  // ── 4. FPS counter + diagnostics ──
   state.fpsCount++;
+  const now = performance.now();
   if (now - state.fpsLast >= 1000) {
-    state.fps = state.fpsCount;
-    state.fpsCount = 0;
-    state.fpsLast = now;
+    state.fps = state.fpsCount; state.fpsCount = 0; state.fpsLast = now;
     infoFps.textContent = `${state.fps}  [D:${diag.attempts} S:${diag.successes} E:${diag.errors}]`;
-    // Show last error in console when debugging
-    if (diag.lastError && state.debugMode) {
-      console.log('[diag]', diag.lastError);
-    }
   }
 
   requestAnimationFrame(renderLoop);
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// UI helpers
+// UI helpers + events
 // ═══════════════════════════════════════════════════════════════════
 
 function setStatus(msg, hide = false) {
@@ -346,29 +269,17 @@ function setStatus(msg, hide = false) {
   statusOverlay.classList.toggle('hidden', hide);
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// Event listeners
-// ═══════════════════════════════════════════════════════════════════
-
 btnStart.addEventListener('click', startCamera);
 btnStop.addEventListener('click', stopCamera);
-
-frameSelect.addEventListener('change', (e) => {
-  state.currentFrameIndex = parseInt(e.target.value, 10);
-});
-
-debugToggle.addEventListener('change', (e) => {
-  state.debugMode = e.target.checked;
-});
-
-scaleSlider.addEventListener('input', (e) => {
+frameSelect?.addEventListener('change', (e) => { state.currentFrameIndex = parseInt(e.target.value, 10); });
+debugToggle?.addEventListener('change', (e) => { state.debugMode = e.target.checked; });
+scaleSlider?.addEventListener('input', (e) => {
   state.frameScaleMultiplier = parseFloat(e.target.value);
-  scaleValue.textContent = state.frameScaleMultiplier.toFixed(2);
+  if (scaleValue) scaleValue.textContent = state.frameScaleMultiplier.toFixed(2);
 });
-
-offsetSlider.addEventListener('input', (e) => {
+offsetSlider?.addEventListener('input', (e) => {
   state.verticalOffset = parseInt(e.target.value, 10);
-  offsetValue.textContent = state.verticalOffset;
+  if (offsetValue) offsetValue.textContent = state.verticalOffset;
 });
 
 // ═══════════════════════════════════════════════════════════════════
@@ -376,15 +287,12 @@ offsetSlider.addEventListener('input', (e) => {
 // ═══════════════════════════════════════════════════════════════════
 
 async function init() {
-  setStatus('Loading assets and face model…');
-
+  setStatus('Loading face model…');
   try {
-    // Load glasses images (or generate fallbacks) while the model downloads.
-    const [/* assets */] = await Promise.all([
-      loadGlassesAssets(),
+    await Promise.all([
       initFaceDetector((msg) => setStatus(msg)),
+      loadGlassesAssets(),
     ]);
-
     modelReady = true;
     btnStart.disabled = false;
     setStatus('Ready! Click "Start Camera" to begin.');

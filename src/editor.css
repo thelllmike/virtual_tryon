@@ -1,0 +1,368 @@
+/* ─── Reset ─── */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #0f0f1a;
+  color: #d8dae5;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ─── Header ─── */
+.ed-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 20px;
+  background: #13131f;
+  border-bottom: 1px solid #1e2035;
+  flex-shrink: 0;
+}
+
+.back-link {
+  color: #6a6d7e;
+  text-decoration: none;
+  font-size: 0.85rem;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid #23263a;
+  white-space: nowrap;
+  transition: color 0.15s, border-color 0.15s;
+}
+.back-link:hover { color: #d8dae5; border-color: #4a4d6a; }
+
+.ed-title { flex: 1; }
+.ed-title h1 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #e94560, #c23ae9);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.ed-subtitle { font-size: 0.76rem; color: #565872; }
+
+.ed-header-right { display: flex; align-items: center; gap: 6px; }
+
+.zoom-label {
+  font-size: 0.8rem;
+  color: #6a6d7e;
+  font-family: monospace;
+  min-width: 42px;
+  text-align: right;
+}
+
+.icon-btn {
+  background: #1c1e32;
+  border: 1px solid #2a2d44;
+  color: #9a9db0;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, color 0.15s;
+  flex-shrink: 0;
+}
+.icon-btn:hover { background: #23263a; color: #d8dae5; }
+
+/* ─── Layout ─── */
+.ed-layout {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* ─── Sidebars ─── */
+.ed-sidebar {
+  width: 230px;
+  flex-shrink: 0;
+  background: #12121e;
+  border-color: #1e2035;
+  overflow-y: auto;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.ed-left  { border-right: 1px solid #1e2035; }
+.ed-right { border-left:  1px solid #1e2035; }
+
+/* ─── Sections ─── */
+.ed-section {
+  background: #16182a;
+  border: 1px solid #23263a;
+  border-radius: 10px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.section-title {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #565872;
+  margin-bottom: 2px;
+}
+
+/* ─── Upload zone ─── */
+.upload-zone {
+  position: relative;
+  border: 2px dashed #2a2d44;
+  border-radius: 8px;
+  padding: 18px 12px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.18s, background 0.18s;
+}
+.upload-zone:hover, .upload-zone.drag-over {
+  border-color: #e94560;
+  background: rgba(233,69,96,0.05);
+}
+.upload-zone input[type="file"] {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+  width: 100%;
+  height: 100%;
+}
+.upload-icon { font-size: 1.8rem; margin-bottom: 4px; }
+.upload-zone p { font-size: 0.8rem; color: #6a6d7e; line-height: 1.5; }
+.upload-zone strong { color: #9a9db0; }
+.upload-hint { font-size: 0.72rem !important; color: #3d4060 !important; margin-top: 4px; }
+
+/* ─── Buttons ─── */
+.btn-primary {
+  background: linear-gradient(135deg, #e94560, #c23ae9);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  width: 100%;
+  transition: opacity 0.2s, transform 0.1s;
+}
+.btn-primary:hover:not(:disabled) { opacity: 0.88; }
+.btn-primary:active:not(:disabled) { transform: scale(0.97); }
+.btn-primary:disabled { opacity: 0.35; cursor: not-allowed; }
+
+.btn-secondary {
+  background: #1c1e32;
+  color: #9a9db0;
+  border: 1px solid #2a2d44;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  flex: 1;
+  transition: background 0.15s, color 0.15s;
+}
+.btn-secondary:hover:not(:disabled) { background: #23263a; color: #d8dae5; }
+.btn-secondary:disabled { opacity: 0.3; cursor: not-allowed; }
+.btn-full { width: 100%; }
+
+.btn-row { display: flex; gap: 6px; }
+
+/* ─── Tool buttons ─── */
+.tool-group { display: flex; flex-direction: column; gap: 4px; }
+
+.tool-btn {
+  background: #1c1e32;
+  color: #9a9db0;
+  border: 1px solid #2a2d44;
+  border-radius: 7px;
+  padding: 8px 12px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.tool-btn:hover  { background: #23263a; color: #d8dae5; }
+.tool-btn.active {
+  background: rgba(233,69,96,0.15);
+  border-color: #e94560;
+  color: #e94560;
+}
+
+/* ─── Sliders ─── */
+.slider-row { display: flex; flex-direction: column; gap: 4px; }
+.slider-row label { font-size: 0.78rem; color: #6a6d7e; }
+
+.slider-with-val { display: flex; align-items: center; gap: 8px; }
+.slider-with-val input[type="range"] {
+  -webkit-appearance: none;
+  flex: 1;
+  height: 5px;
+  border-radius: 3px;
+  background: #23263a;
+  outline: none;
+}
+.slider-with-val input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #e94560;
+  cursor: pointer;
+}
+
+.val-badge {
+  font-size: 0.75rem;
+  font-family: monospace;
+  color: #7ec8e3;
+  min-width: 36px;
+  text-align: right;
+}
+
+/* ─── Progress ─── */
+.progress-wrap { display: flex; flex-direction: column; gap: 4px; }
+.progress-bar-bg {
+  height: 6px;
+  background: #23263a;
+  border-radius: 3px;
+  overflow: hidden;
+}
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #e94560, #c23ae9);
+  border-radius: 3px;
+  transition: width 0.2s;
+}
+.progress-text { font-size: 0.75rem; color: #6a6d7e; text-align: center; }
+
+/* ─── Export fields ─── */
+.field-row { display: flex; flex-direction: column; gap: 3px; }
+.field-row label { font-size: 0.76rem; color: #6a6d7e; }
+.field-row input[type="text"],
+.field-row input[type="number"] {
+  background: #1c1e32;
+  border: 1px solid #2a2d44;
+  border-radius: 6px;
+  padding: 7px 9px;
+  color: #d8dae5;
+  font-size: 0.84rem;
+  outline: none;
+  width: 100%;
+}
+.field-row input:focus { border-color: #e94560; }
+
+/* ─── Anchor diagram ─── */
+.export-info { margin-top: 4px; }
+
+.anchor-diagram { margin-top: 8px; }
+.anchor-bar {
+  position: relative;
+  height: 28px;
+  background: repeating-linear-gradient(
+    45deg,
+    #1a1a2e,
+    #1a1a2e 6px,
+    #16182a 6px,
+    #16182a 12px
+  );
+  border-radius: 6px;
+  border: 1px solid #2a2d44;
+}
+.anchor-dot {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  font-weight: 700;
+}
+.anchor-dot.left  { left: 30%; background: #e94560; color: #fff; transform: translate(-50%, -50%); }
+.anchor-dot.right { left: 70%; background: #c23ae9; color: #fff; transform: translate(-50%, -50%); }
+.anchor-hint { font-size: 0.7rem; color: #3d4060; margin-top: 4px; }
+
+/* ─── Tips ─── */
+.tips-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.tips-list li {
+  font-size: 0.78rem;
+  color: #6a6d7e;
+  padding-left: 8px;
+  border-left: 2px solid #23263a;
+  line-height: 1.45;
+}
+.tips-list strong { color: #9a9db0; }
+
+.hint {
+  font-size: 0.74rem;
+  color: #4a4d6a;
+  line-height: 1.5;
+}
+.hint strong { color: #6a6d7e; }
+
+/* ─── Canvas area ─── */
+.ed-canvas-area {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  background: #0f0f1a;
+}
+
+.empty-state {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #2a2d44;
+  font-size: 1rem;
+  pointer-events: none;
+}
+
+.editor-wrap {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: stretch;
+}
+
+#editor-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  cursor: none; /* hidden — we use the custom ring */
+}
+
+/* ─── Brush cursor ring ─── */
+.cursor-ring {
+  position: absolute;
+  border: 2px solid rgba(233, 69, 96, 0.85);
+  border-radius: 50%;
+  pointer-events: none;
+  box-shadow: 0 0 0 1px rgba(0,0,0,0.5);
+  transform: translate(0, 0);
+  transition: width 0.05s, height 0.05s;
+}
+
+/* ─── Scrollbar ─── */
+.ed-sidebar::-webkit-scrollbar { width: 4px; }
+.ed-sidebar::-webkit-scrollbar-track { background: transparent; }
+.ed-sidebar::-webkit-scrollbar-thumb { background: #23263a; border-radius: 2px; }

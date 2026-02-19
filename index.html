@@ -9,8 +9,15 @@
 <body>
   <div id="app">
     <header>
-      <h1>Virtual Spectacle Try-On</h1>
-      <p class="subtitle">Powered by TensorFlow.js &amp; MediaPipe FaceMesh</p>
+      <div class="header-row">
+        <div>
+          <h1>Virtual Spectacle Try-On</h1>
+          <p class="subtitle">Powered by TensorFlow.js &amp; MediaPipe FaceMesh</p>
+        </div>
+        <a href="/editor.html" class="editor-link">
+          🖼️ Prepare Try-On Image
+        </a>
+      </div>
     </header>
 
     <main>
@@ -57,13 +64,19 @@
           <input type="range" id="offset-slider" min="-40" max="40" step="1" value="0" />
         </div>
 
-        <div class="info-panel" id="info-panel">
+        <div class="info-panel">
           <h3>Live Stats</h3>
           <div class="info-row"><span>Scale</span><span id="info-scale">&ndash;</span></div>
           <div class="info-row"><span>Rotation</span><span id="info-rotation">&ndash;</span></div>
           <div class="info-row"><span>Yaw</span><span id="info-yaw">&ndash;</span></div>
           <div class="info-row"><span>FPS</span><span id="info-fps">&ndash;</span></div>
-          <div class="info-row" style="margin-top:6px;font-size:0.75rem;color:#565872"><span>D=detect S=success E=error</span></div>
+          <div class="info-row" style="margin-top:6px;font-size:0.75rem;color:#565872">
+            <span>D=detect S=success E=error</span>
+          </div>
+        </div>
+
+        <div class="control-group tip-box">
+          <p>💡 <strong>New glasses?</strong> Use the <a href="/editor.html">Image Editor</a> to remove the background and export the correct PNG format for try-on.</p>
         </div>
       </aside>
     </main>
