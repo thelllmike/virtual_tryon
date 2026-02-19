@@ -10,6 +10,8 @@
  * fallback in extractFaceTransform() handles that transparently.
  */
 
+import * as tf from '@tensorflow/tfjs-core';
+import '@tensorflow/tfjs-backend-webgl';          // registers WebGL backend
 import * as faceLandmarksDetection from '@tensorflow-models/face-landmarks-detection';
 
 // ─── Detector singleton ───
@@ -27,6 +29,10 @@ export const diag = { attempts: 0, successes: 0, errors: 0, lastError: '' };
  */
 export async function initFaceDetector(onProgress) {
   if (onProgress) onProgress('Loading FaceMesh model…');
+
+  // Ensure the WebGL backend is registered and ready before model creation.
+  await tf.setBackend('webgl');
+  await tf.ready();
 
   const model = faceLandmarksDetection.SupportedModels.MediaPipeFaceMesh;
   detector = await faceLandmarksDetection.createDetector(model, {
