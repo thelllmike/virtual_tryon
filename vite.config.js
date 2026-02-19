@@ -36,13 +36,9 @@ export default defineConfig({
       },
 
   optimizeDeps: {
-    include: [
-      '@tensorflow-models/face-landmarks-detection',
-      '@tensorflow/tfjs-core',
-      '@tensorflow/tfjs-backend-webgl',
-      '@tensorflow/tfjs-converter',
-    ],
-    // @mediapipe/face_mesh is no longer used — switched to tfjs runtime
-    // to avoid WASM bundling failures in Vite production builds.
+    // @mediapipe/tasks-vision loads its WASM from CDN at runtime via
+    // FilesetResolver — exclude it so Vite/esbuild never tries to bundle
+    // the binary internals.
+    exclude: ['@mediapipe/tasks-vision'],
   },
 });
